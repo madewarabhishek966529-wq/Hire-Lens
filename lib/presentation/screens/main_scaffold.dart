@@ -7,7 +7,7 @@ class MainScaffold extends StatelessWidget {
   const MainScaffold({super.key, required this.child});
 
   int _calculateSelectedIndex(BuildContext context) {
-    final location = GoRouterState.of(context).uri.pathname;
+    final location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/dashboard')) return 0;
     if (location.startsWith('/jobs')) return 1;
     if (location.startsWith('/interview')) return 2;
