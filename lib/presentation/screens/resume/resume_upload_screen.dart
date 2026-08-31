@@ -80,10 +80,10 @@ class _ResumeUploadScreenState extends ConsumerState<ResumeUploadScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withOpacity(0.08),
+                  color: AppColors.primaryBlue.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AppColors.primaryBlue.withOpacity(0.4),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.4),
                     style: BorderStyle.solid,
                     width: 2,
                   ),
@@ -156,7 +156,7 @@ class _ResumeUploadScreenState extends ConsumerState<ResumeUploadScreen> {
                             .map(
                               (skill) => Chip(
                                 label: Text(skill, style: const TextStyle(fontSize: 11)),
-                                backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+                                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.15),
                               ),
                             )
                             .toList(),

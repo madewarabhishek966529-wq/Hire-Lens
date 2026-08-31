@@ -57,7 +57,7 @@ class JobsListScreen extends ConsumerWidget {
                                     padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryBlue
-                                          .withOpacity(0.15),
+                                          .withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -92,7 +92,7 @@ class JobsListScreen extends ConsumerWidget {
                                         horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: AppColors.primaryBlue
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Text(

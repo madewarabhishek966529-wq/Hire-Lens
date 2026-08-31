@@ -103,7 +103,7 @@ class _MockInterviewScreenState extends ConsumerState<MockInterviewScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColors.accentViolet.withOpacity(0.2),
+                            color: AppColors.accentViolet.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -277,7 +277,7 @@ class _MockInterviewScreenState extends ConsumerState<MockInterviewScreen> {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.accentViolet.withOpacity(0.15),
+            color: AppColors.accentViolet.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: AppColors.accentVioletLight),
@@ -294,7 +294,7 @@ class _MockInterviewScreenState extends ConsumerState<MockInterviewScreen> {
 
   Widget _buildEvaluationReport(BuildContext context, InterviewEvaluation eval) {
     return Card(
-      color: AppColors.accentViolet.withOpacity(0.08),
+      color: AppColors.accentViolet.withValues(alpha: 0.08),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: const BorderSide(color: AppColors.accentViolet, width: 1),

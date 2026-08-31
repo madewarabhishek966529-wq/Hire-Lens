@@ -82,7 +82,7 @@ class EvidenceGridScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: confidenceColor.withOpacity(0.2),
+                    color: confidenceColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -110,7 +110,7 @@ class EvidenceGridScreen extends ConsumerWidget {
                     ? AppColors.darkSurface
                     : AppColors.lightCard,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.darkBorder.withOpacity(0.5)),
+                border: Border.all(color: AppColors.darkBorder.withValues(alpha: 0.5)),
               ),
               child: Text(
                 '"${item.candidateQuote}"',

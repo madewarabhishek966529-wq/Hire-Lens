@@ -67,7 +67,7 @@ class ResumeOptimizerScreen extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.2),
+                    color: AppColors.primaryBlue.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -99,7 +99,7 @@ class ResumeOptimizerScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.priorityHigh.withOpacity(0.2),
+                        color: AppColors.priorityHigh.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: AppColors.priorityHigh),
                       ),
@@ -164,9 +164,9 @@ class ResumeOptimizerScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.matchStrong.withOpacity(0.1),
+                color: AppColors.matchStrong.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.matchStrong.withOpacity(0.4)),
+                border: Border.all(color: AppColors.matchStrong.withValues(alpha: 0.4)),
               ),
               child: Text(
                 sug.suggestedBullet,

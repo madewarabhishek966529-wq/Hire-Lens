@@ -36,7 +36,7 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     CircleAvatar(
                       radius: 30,
-                      backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
+                      backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.2),
                       child: Text(
                         (profile?.fullName ?? 'Alex Morgan')[0],
                         style: const TextStyle(
@@ -114,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                               ['Flutter', 'Dart', 'Riverpod', 'REST APIs', 'SQLite', 'Firebase', 'AWS'])
                           .map((skill) => Chip(
                                 label: Text(skill, style: const TextStyle(fontSize: 12)),
-                                backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+                                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.15),
                               ))
                           .toList(),
                     ),

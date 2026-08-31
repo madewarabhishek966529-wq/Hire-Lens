@@ -222,7 +222,7 @@ Output JSON format:
   ]
 }
 
-Candidate Skills: ${candidate.skills.join(', ')}
+Candidate Skills: ${profile.skills.join(', ')}
 Job Description: ${job.description}
 ''';
 

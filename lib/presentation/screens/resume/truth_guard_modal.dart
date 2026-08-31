@@ -34,7 +34,7 @@ class TruthGuardModal extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppColors.priorityHigh.withOpacity(0.1),
+              color: AppColors.priorityHigh.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(

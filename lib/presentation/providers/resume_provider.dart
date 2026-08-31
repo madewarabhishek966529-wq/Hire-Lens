@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/local/database_helper.dart';
 import '../../data/local/demo_data_seeder.dart';
-import '../../data/remote/fallback_ai_engine.dart';
 import '../../domain/entities/resume_suggestion.dart';
 import 'job_provider.dart';
 

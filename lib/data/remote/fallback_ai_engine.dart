@@ -388,7 +388,7 @@ class FallbackAiEngine implements AiProvider {
       starAnalysis: {
         'Situation': 'Building mobile software component under specific requirements.',
         'Task': 'Ensure performance, clean state management, and reliable data sync.',
-        'Action': answerText.length > 80 ? answerText.substring(0, 80) + '...' : answerText,
+        'Action': answerText.length > 80 ? '${answerText.substring(0, 80)}...' : answerText,
         'Result': 'Achieved responsive UI and clean architecture structure.'
       },
       whatWorked: [

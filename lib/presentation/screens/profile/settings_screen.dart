@@ -16,7 +16,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _apiKeyController = TextEditingController();
   bool _hasSavedKey = false;
-  bool _isLoadingKey = true;
 
   @override
   void initState() {
@@ -30,12 +29,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _apiKeyController.text = existingKey;
       setState(() {
         _hasSavedKey = true;
-        _isLoadingKey = false;
       });
     } else {
       setState(() {
         _hasSavedKey = false;
-        _isLoadingKey = false;
       });
     }
   }
@@ -82,8 +79,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // Real-World AI API Key Banner
           Card(
             color: _hasSavedKey
-                ? AppColors.matchStrong.withOpacity(0.12)
-                : AppColors.primaryBlue.withOpacity(0.12),
+                ? AppColors.matchStrong.withValues(alpha: 0.12)
+                : AppColors.primaryBlue.withValues(alpha: 0.12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
@@ -117,7 +114,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
                           color: (_hasSavedKey ? AppColors.matchStrong : AppColors.primaryBlueLight)
-                              .withOpacity(0.2),
+                              .withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(

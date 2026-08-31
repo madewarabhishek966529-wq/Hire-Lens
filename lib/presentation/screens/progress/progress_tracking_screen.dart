@@ -92,7 +92,7 @@ class ProgressTrackingScreen extends ConsumerWidget {
                               dotData: const FlDotData(show: true),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: AppColors.primaryBlue.withOpacity(0.15),
+                                color: AppColors.primaryBlue.withValues(alpha: 0.15),
                               ),
                             ),
                           ],

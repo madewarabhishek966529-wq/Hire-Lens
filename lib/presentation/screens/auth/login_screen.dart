@@ -99,7 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               // 1-Click Instant Demo Access Banner
               Card(
-                color: AppColors.primaryBlue.withOpacity(0.12),
+                color: AppColors.primaryBlue.withValues(alpha: 0.12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: const BorderSide(

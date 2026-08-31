@@ -23,9 +23,9 @@ class DeveloperObservabilityScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.accentViolet.withOpacity(0.15),
+                color: AppColors.accentViolet.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.accentViolet.withOpacity(0.4)),
+                border: Border.all(color: AppColors.accentViolet.withValues(alpha: 0.4)),
               ),
               child: const Row(
                 children: [
