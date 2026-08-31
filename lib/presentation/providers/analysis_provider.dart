@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/local/database_helper.dart';
 import '../../data/local/demo_data_seeder.dart';
-import '../../data/remote/fallback_ai_engine.dart';
-import '../../domain/entities/hireability_score.dart';
-import '../../domain/entities/skill_gap.dart';
 import '../../domain/entities/evidence.dart';
+import '../../domain/entities/hireability_score.dart';
 import '../../domain/entities/job.dart';
+import '../../domain/entities/skill_gap.dart';
+import 'ai_service_provider.dart';
 import 'auth_provider.dart';
 import 'job_provider.dart';
 
@@ -72,7 +72,7 @@ class AnalysisNotifier extends StateNotifier<AnalysisState> {
   Future<void> runFullAnalysisForJob(Job job) async {
     state = state.copyWith(isLoading: true);
     final profile = ref.read(authProvider).profile;
-    final engine = FallbackAiEngine();
+    final engine = ref.read(aiServiceProvider);
 
     if (profile != null) {
       final score = await engine.calculateHireabilityScore(profile, job);

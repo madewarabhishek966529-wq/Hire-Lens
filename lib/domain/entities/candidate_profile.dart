@@ -35,6 +35,44 @@ class CandidateProfile {
     required this.technologies,
   });
 
+  CandidateProfile copyWith({
+    String? id,
+    String? userId,
+    String? fullName,
+    String? currentRole,
+    int? yearsExperience,
+    String? targetRole,
+    String? targetIndustry,
+    String? location,
+    String? workPreference,
+    String? summary,
+    List<String>? skills,
+    List<Map<String, dynamic>>? experience,
+    List<Map<String, dynamic>>? projects,
+    List<Map<String, dynamic>>? education,
+    List<String>? certifications,
+    List<String>? technologies,
+  }) {
+    return CandidateProfile(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      fullName: fullName ?? this.fullName,
+      currentRole: currentRole ?? this.currentRole,
+      yearsExperience: yearsExperience ?? this.yearsExperience,
+      targetRole: targetRole ?? this.targetRole,
+      targetIndustry: targetIndustry ?? this.targetIndustry,
+      location: location ?? this.location,
+      workPreference: workPreference ?? this.workPreference,
+      summary: summary ?? this.summary,
+      skills: skills ?? this.skills,
+      experience: experience ?? this.experience,
+      projects: projects ?? this.projects,
+      education: education ?? this.education,
+      certifications: certifications ?? this.certifications,
+      technologies: technologies ?? this.technologies,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

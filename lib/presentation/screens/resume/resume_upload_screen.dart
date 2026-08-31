@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../data/local/file_parser_service.dart';
-import '../../../data/remote/fallback_ai_engine.dart';
+import '../../providers/ai_service_provider.dart';
 import '../../providers/auth_provider.dart';
 
 class ResumeUploadScreen extends ConsumerStatefulWidget {
@@ -35,7 +35,7 @@ class _ResumeUploadScreenState extends ConsumerState<ResumeUploadScreen> {
 
       // Extract real text from file
       final rawText = await FileParserService.extractTextFromPlatformFile(file);
-      final engine = FallbackAiEngine();
+      final engine = ref.read(aiServiceProvider);
       final profile = await engine.parseResume(rawText);
 
       await ref.read(authProvider.notifier).saveOnboardingProfile(profile);

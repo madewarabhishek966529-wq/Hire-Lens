@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/local/database_helper.dart';
 import '../../data/local/demo_data_seeder.dart';
-import '../../data/remote/fallback_ai_engine.dart';
 import '../../domain/entities/interview.dart';
 import '../../domain/entities/job.dart';
+import 'ai_service_provider.dart';
 import 'job_provider.dart';
 
 class InterviewState {
@@ -64,7 +64,7 @@ class InterviewNotifier extends StateNotifier<InterviewState> {
     final jobId = selectedJob?.id ?? DemoDataSeeder.demoJobId;
     final jobTitle = selectedJob?.title ?? 'Mobile Application Developer';
 
-    final engine = FallbackAiEngine();
+    final engine = ref.read(aiServiceProvider);
     // Generate questions
     final session = await engine.generateInterviewSession(
       selectedJob ??
@@ -102,7 +102,7 @@ class InterviewNotifier extends StateNotifier<InterviewState> {
 
     state = state.copyWith(isEvaluating: true);
     final currentQ = session.questions[state.currentQuestionIndex];
-    final engine = FallbackAiEngine();
+    final engine = ref.read(aiServiceProvider);
 
     final evaluation = await engine.evaluateInterviewAnswer(
       currentQ.id,

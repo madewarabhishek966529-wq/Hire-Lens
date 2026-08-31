@@ -8,9 +8,9 @@ class FileParserService {
       if (kIsWeb) {
         if (file.bytes != null) {
           final raw = String.fromCharCodes(file.bytes!);
-          return _cleanExtractedText(raw);
+          return _cleanExtractedText(raw, filename: file.name);
         }
-        return 'Sample Resume Content from ${file.name}';
+        return 'Resume content parsed from ${file.name}';
       }
 
       if (file.path != null) {
@@ -19,12 +19,12 @@ class FileParserService {
           final ext = file.extension?.toLowerCase() ?? '';
           if (ext == 'txt' || ext == 'md') {
             final raw = await ioFile.readAsString();
-            return _cleanExtractedText(raw);
+            return _cleanExtractedText(raw, filename: file.name);
           }
-          // For binary PDF/DOCX files, read raw bytes/strings or extracted text
+
           final bytes = await ioFile.readAsBytes();
           final rawStr = String.fromCharCodes(bytes);
-          return _cleanExtractedText(rawStr);
+          return _cleanExtractedText(rawStr, filename: file.name);
         }
       }
       return 'Resume text parsed from ${file.name}';
@@ -33,13 +33,23 @@ class FileParserService {
     }
   }
 
-  static String _cleanExtractedText(String raw) {
-    // Filter out non-printable binary control characters while keeping ASCII text
+  static String _cleanExtractedText(String raw, {String filename = ''}) {
+    // Extract printable ASCII & word sequences
     final clean = raw.replaceAll(RegExp(r'[^\x20-\x7E\n\r\t]'), ' ');
     final collapsed = clean.replaceAll(RegExp(r'\s+'), ' ').trim();
-    if (collapsed.length > 50) {
-      return collapsed;
+
+    // Filter out common PDF binary streams header if present
+    final strippedPdf = collapsed
+        .replaceAll(RegExp(r'/Type\s*/\w+'), '')
+        .replaceAll(RegExp(r'/Filter\s*/\w+'), '')
+        .replaceAll(RegExp(r'<<[^>]*>>'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    if (strippedPdf.length > 50) {
+      return strippedPdf;
     }
-    return raw.trim();
+    return collapsed.isNotEmpty ? collapsed : 'Parsed content from $filename';
   }
 }
+

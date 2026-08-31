@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/local/database_helper.dart';
 import '../../data/local/demo_data_seeder.dart';
-import '../../data/remote/fallback_ai_engine.dart';
 import '../../domain/entities/job.dart';
+import 'ai_service_provider.dart';
+import 'auth_provider.dart';
 
 class JobState {
   final List<Job> jobs;
@@ -33,14 +34,23 @@ class JobState {
 }
 
 class JobNotifier extends StateNotifier<JobState> {
-  JobNotifier() : super(const JobState(jobs: [])) {
+  final Ref ref;
+
+  JobNotifier(this.ref) : super(const JobState(jobs: [])) {
     loadJobs();
   }
 
   Future<void> loadJobs() async {
     state = state.copyWith(isLoading: true);
     try {
-      final jobs = await DatabaseHelper.instance.getJobs(DemoDataSeeder.demoUserId);
+      final activeUserId = ref.read(authProvider).userId ?? DemoDataSeeder.demoUserId;
+      var jobs = await DatabaseHelper.instance.getJobs(activeUserId);
+
+      if (jobs.isEmpty && activeUserId != DemoDataSeeder.demoUserId) {
+        // Fallback to demo jobs if user has no saved jobs yet
+        jobs = await DatabaseHelper.instance.getJobs(DemoDataSeeder.demoUserId);
+      }
+
       final selected = jobs.isNotEmpty ? jobs.first : null;
       state = state.copyWith(
         jobs: jobs,
@@ -63,8 +73,9 @@ class JobNotifier extends StateNotifier<JobState> {
     required String jdText,
   }) async {
     state = state.copyWith(isLoading: true);
-    final engine = FallbackAiEngine();
-    final newJob = await engine.analyzeJob(title, company, jdText, userId: DemoDataSeeder.demoUserId);
+    final activeUserId = ref.read(authProvider).userId ?? DemoDataSeeder.demoUserId;
+    final engine = ref.read(aiServiceProvider);
+    final newJob = await engine.analyzeJob(title, company, jdText, userId: activeUserId);
     await DatabaseHelper.instance.saveJob(newJob);
     
     final updatedList = [newJob, ...state.jobs];
@@ -78,5 +89,6 @@ class JobNotifier extends StateNotifier<JobState> {
 }
 
 final jobProvider = StateNotifierProvider<JobNotifier, JobState>((ref) {
-  return JobNotifier();
+  return JobNotifier(ref);
 });
+

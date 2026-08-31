@@ -9,6 +9,7 @@ import '../../domain/entities/skill_gap.dart';
 import '../../domain/entities/evidence.dart';
 import '../../domain/entities/resume_suggestion.dart';
 import '../../domain/entities/interview.dart';
+import '../local/database_helper.dart';
 import 'ai_provider.dart';
 import 'fallback_ai_engine.dart';
 
@@ -187,21 +188,219 @@ Requirements: ${job.requirements.map((r) => r.title).join('; ')}
 
   @override
   Future<List<EvidenceItem>> extractEvidence(CandidateProfile candidate, Job job) async {
+    if (apiKey == null || apiKey!.isEmpty) {
+      return _fallback.extractEvidence(candidate, job);
+    }
+    try {
+      final prompt = '''
+You are an Evidence Extraction AI for ATS resume screening. Match candidate experience against job requirements.
+Return structured JSON:
+{
+  "evidence": [
+    {
+      "requirementId": "req-id",
+      "requirementTitle": "Requirement Title",
+      "candidateQuote": "Exact bullet quote from candidate experience or 'No explicit evidence found.'",
+      "confidence": "HIGH", // HIGH, MEDIUM, LOW, or NONE
+      "explanation": "Why this rating was given"
+    }
+  ]
+}
+
+Candidate Experience Bullets:
+${candidate.experience.map((e) => (e['bullets'] as List<dynamic>? ?? []).join('\n')).join('\n')}
+
+Job Requirements:
+${job.requirements.map((r) => '${r.id}: ${r.title} (${r.category})').join('\n')}
+''';
+
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'Evidence Extraction');
+      if (jsonRes != null && jsonRes['evidence'] != null) {
+        final list = (jsonRes['evidence'] as List<dynamic>).map((item) {
+          final confStr = (item['confidence'] as String? ?? 'NONE').toUpperCase();
+          final conf = EvidenceConfidence.values.firstWhere(
+            (c) => c.name.toUpperCase() == confStr,
+            orElse: () => EvidenceConfidence.none,
+          );
+          return EvidenceItem(
+            id: _uuid.v4(),
+            requirementId: item['requirementId'] ?? '',
+            requirementTitle: item['requirementTitle'] ?? '',
+            candidateQuote: item['candidateQuote'] ?? 'No explicit evidence found.',
+            confidence: conf,
+            explanation: item['explanation'] ?? 'Analyzed by live AI engine.',
+          );
+        }).toList();
+
+        if (list.isNotEmpty) return list;
+      }
+    } catch (_) {}
     return _fallback.extractEvidence(candidate, job);
   }
 
   @override
   Future<List<SkillGap>> analyzeSkillGaps(CandidateProfile candidate, Job job, List<EvidenceItem> evidence) async {
+    if (apiKey == null || apiKey!.isEmpty) {
+      return _fallback.analyzeSkillGaps(candidate, job, evidence);
+    }
+    try {
+      final prompt = '''
+You are a Skill Gap Priority Algorithm AI. Analyze missing and partial skill evidence for candidate targeting ${job.title}.
+Return JSON:
+{
+  "gaps": [
+    {
+      "skillName": "Skill Name",
+      "status": "missing", // missing, partial, or strong
+      "priority": "critical", // critical, high, medium, or low
+      "currentEvidence": "Summary of current evidence",
+      "missingDetails": "What specific experience is missing",
+      "whyItMatters": "Why this role requires it",
+      "recommendedAction": "Actionable evidence building step",
+      "priorityScore": 85 // 0-100 score
+    }
+  ]
+}
+
+Candidate Skills: ${candidate.skills.join(', ')}
+Evidence Map:
+${evidence.map((e) => '${e.requirementTitle}: [${e.confidence.name}] ${e.candidateQuote}').join('\n')}
+''';
+
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'Skill Gap Analysis');
+      if (jsonRes != null && jsonRes['gaps'] != null) {
+        final list = (jsonRes['gaps'] as List<dynamic>).map((g) {
+          final statusStr = (g['status'] as String? ?? 'missing').toLowerCase();
+          final status = GapMatchStatus.values.firstWhere(
+            (s) => s.name.toLowerCase() == statusStr,
+            orElse: () => GapMatchStatus.missing,
+          );
+          final priorityStr = (g['priority'] as String? ?? 'medium').toLowerCase();
+          final priority = GapPriority.values.firstWhere(
+            (p) => p.name.toLowerCase() == priorityStr,
+            orElse: () => GapPriority.medium,
+          );
+
+          return SkillGap(
+            id: _uuid.v4(),
+            jobId: job.id,
+            skillName: g['skillName'] ?? 'Target Skill',
+            status: status,
+            priority: priority,
+            currentEvidence: g['currentEvidence'] ?? 'No evidence.',
+            missingDetails: g['missingDetails'] ?? 'Missing specific experience.',
+            whyItMatters: g['whyItMatters'] ?? 'Important requirement for the target role.',
+            recommendedAction: g['recommendedAction'] ?? 'Build portfolio project evidence.',
+            priorityScore: (g['priorityScore'] as num?)?.toInt() ?? 50,
+          );
+        }).toList();
+
+        list.sort((a, b) => b.priorityScore.compareTo(a.priorityScore));
+        if (list.isNotEmpty) return list;
+      }
+    } catch (_) {}
     return _fallback.analyzeSkillGaps(candidate, job, evidence);
   }
 
   @override
   Future<List<ResumeSuggestion>> optimizeResume(CandidateProfile candidate, Job job) async {
+    if (apiKey == null || apiKey!.isEmpty) {
+      return _fallback.optimizeResume(candidate, job);
+    }
+    try {
+      final prompt = '''
+You are a Resume Optimizer AI. Optimize resume bullet points for candidate targeting ${job.title} at ${job.company}.
+Return JSON:
+{
+  "suggestions": [
+    {
+      "originalBullet": "Original candidate bullet",
+      "suggestedBullet": "Action-oriented improved bullet matching job requirement",
+      "whyItChanged": "Explanation of improvement",
+      "matchedRequirement": "Requirement matched",
+      "truthGuardFlags": [
+        {
+          "title": "Warning title if quantitative claim was inferred",
+          "description": "Quoted metric",
+          "reason": "Why candidate needs to verify"
+        }
+      ]
+    }
+  ]
+}
+
+Candidate Bullets:
+${candidate.experience.map((e) => (e['bullets'] as List<dynamic>? ?? []).join('\n')).join('\n')}
+
+Job Requirements: ${job.requirements.map((r) => r.title).join(', ')}
+''';
+
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'Resume Optimization');
+      if (jsonRes != null && jsonRes['suggestions'] != null) {
+        final list = (jsonRes['suggestions'] as List<dynamic>).map((s) {
+          final flags = (s['truthGuardFlags'] as List<dynamic>? ?? []).map((f) {
+            return TruthGuardFlag(
+              title: f['title'] ?? 'Verification Warning',
+              description: f['description'] ?? '',
+              reason: f['reason'] ?? 'Verify metric accuracy.',
+            );
+          }).toList();
+
+          return ResumeSuggestion(
+            id: _uuid.v4(),
+            jobId: job.id,
+            originalBullet: s['originalBullet'] ?? 'Original bullet',
+            suggestedBullet: s['suggestedBullet'] ?? 'Optimized bullet',
+            whyItChanged: s['whyItChanged'] ?? 'Optimized for target job keywords.',
+            matchedRequirement: s['matchedRequirement'] ?? 'Target Job Alignment',
+            status: SuggestionStatus.pending,
+            truthGuardFlags: flags,
+          );
+        }).toList();
+
+        if (list.isNotEmpty) return list;
+      }
+    } catch (_) {}
     return _fallback.optimizeResume(candidate, job);
   }
 
   @override
   Future<List<TruthGuardFlag>> validateResumeTruth(String originalBullet, String suggestedBullet, CandidateProfile profile) async {
+    if (apiKey == null || apiKey!.isEmpty) {
+      return _fallback.validateResumeTruth(originalBullet, suggestedBullet, profile);
+    }
+    try {
+      final prompt = '''
+You are a Resume Truth Guard Verification AI. Check if the suggested bullet makes hallucinated claims or unsupported metrics not grounded in candidate profile.
+Return JSON:
+{
+  "flags": [
+    {
+      "title": "Flag title",
+      "description": "Unsupported metric or claim text",
+      "reason": "Detailed rationale"
+    }
+  ]
+}
+
+Original Bullet: $originalBullet
+Suggested Bullet: $suggestedBullet
+Candidate Profile Skills: ${profile.skills.join(', ')}
+''';
+
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'Truth Guard Validation');
+      if (jsonRes != null && jsonRes['flags'] != null) {
+        final flags = (jsonRes['flags'] as List<dynamic>).map((f) {
+          return TruthGuardFlag(
+            title: f['title'] ?? 'Truth Guard Flag',
+            description: f['description'] ?? '',
+            reason: f['reason'] ?? 'Unverified metric or technology claim.',
+          );
+        }).toList();
+
+        return flags;
+      }
+    } catch (_) {}
     return _fallback.validateResumeTruth(originalBullet, suggestedBullet, profile);
   }
 
@@ -226,7 +425,7 @@ Candidate Skills: ${profile.skills.join(', ')}
 Job Description: ${job.description}
 ''';
 
-      final jsonRes = await _callOpenAiJson(prompt);
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'Interview Generation');
       if (jsonRes != null && jsonRes['questions'] != null) {
         final qList = (jsonRes['questions'] as List<dynamic>).map((q) {
           return InterviewQuestion(
@@ -283,7 +482,7 @@ Question: $questionText
 Candidate Answer: $answerText
 ''';
 
-      final jsonRes = await _callOpenAiJson(prompt);
+      final jsonRes = await _callOpenAiJson(prompt, requestType: 'STAR Answer Evaluation');
       if (jsonRes != null && jsonRes['overallScore'] != null) {
         return InterviewEvaluation(
           questionId: questionId,
@@ -303,7 +502,8 @@ Candidate Answer: $answerText
     return _fallback.evaluateInterviewAnswer(questionId, questionText, answerText);
   }
 
-  Future<Map<String, dynamic>?> _callOpenAiJson(String systemPrompt) async {
+  Future<Map<String, dynamic>?> _callOpenAiJson(String systemPrompt, {String requestType = 'AI Analysis'}) async {
+    final stopwatch = Stopwatch()..start();
     try {
       final response = await dio.post(
         'https://api.openai.com/v1/chat/completions',
@@ -322,14 +522,53 @@ Candidate Answer: $answerText
           'temperature': 0.2,
         },
       );
+      stopwatch.stop();
 
       if (response.statusCode == 200 && response.data != null) {
         final content = response.data['choices'][0]['message']['content'] as String;
+        final usage = response.data['usage'];
+        final tokens = usage != null ? (usage['total_tokens'] as int? ?? 500) : 500;
+        final cost = tokens * 0.000002;
+
+        _safeLogTelemetry(
+          requestType: requestType,
+          latencyMs: stopwatch.elapsedMilliseconds,
+          tokensUsed: tokens,
+          costEstimate: cost,
+          status: 'SUCCESS',
+        );
+
         return jsonDecode(content) as Map<String, dynamic>;
       }
     } catch (e) {
-      // Fallback on error
+      stopwatch.stop();
+      _safeLogTelemetry(
+        requestType: requestType,
+        latencyMs: stopwatch.elapsedMilliseconds,
+        tokensUsed: 0,
+        costEstimate: 0.0,
+        status: 'ERROR: ${e.toString()}',
+      );
     }
     return null;
   }
+
+  void _safeLogTelemetry({
+    required String requestType,
+    required int latencyMs,
+    required int tokensUsed,
+    required double costEstimate,
+    required String status,
+  }) {
+    try {
+      DatabaseHelper.instance.logAiRequest(
+        requestType: requestType,
+        latencyMs: latencyMs,
+        tokensUsed: tokensUsed,
+        costEstimate: costEstimate,
+        status: status,
+      ).catchError((_) {});
+    } catch (_) {}
+  }
 }
+
